@@ -5,12 +5,12 @@ from gameparser import *
 
 
 def is_winning():
-    i = 0
+    j = 0
 
     for a in rooms["Reception"]["items"]:
-        i = i + 1
+        j += 1
 
-    if i == 6:
+    if j == 6:
         return True
 
     else:
@@ -242,6 +242,7 @@ def is_valid_exit(exits, chosen_exit):
     >>> is_valid_exit(rooms["Parking"]["exits"], "east")
     True
     """
+
     return chosen_exit in exits
 
 
@@ -253,8 +254,10 @@ def execute_go(direction):
     """
     #print (current_room)
     global current_room
-    current_room = move(current_room["exits"], direction)
-
+    try:
+        current_room = move(current_room["exits"], direction)
+    except:
+        current_room = current_room
 
 def execute_take(item_id):
     """This function takes an item_id as an argument and moves this item from the
@@ -268,25 +271,32 @@ def execute_take(item_id):
 
     total_item_mass = 0
 
-    actual_item = items_all[item_id]
+    try:
+        actual_item = items_all[item_id]
+    except:
+        print("Please enter a valid item name")
+        return
+    try:
+        for element in current_room["items"]:
+            if actual_item == element:
+                for myinvitem in inventory:
+                    total_item_mass = total_item_mass + myinvitem["mass"]
 
-    for element in current_room["items"]:
-        if actual_item == element:
-            for myinvitem in inventory:
-                total_item_mass = total_item_mass + myinvitem["mass"]
+                if (total_item_mass + element["mass"] > 3.5):
+                    print ("You cannot take that")
+                    return
 
-            if (total_item_mass + element["mass"] > 3.5):
-                print ("You cannot take that")
+                current_room["items"].pop(i)
+
+                inventory.append(element)
+
+                print("you picked up "+ element["name"])
                 return
-
-            current_room["items"].pop(i)
-
-            inventory.append(element)
-
-            print("you picked up "+ element["name"])
+    except:
+            Print("")
             return
 
-        i = i + 1
+    i = i + 1
 
     print ("You cannot take that")
 
@@ -299,15 +309,24 @@ def execute_drop(item_id):
     """
     i = 0
 
-    actual_item = items_all[item_id]
+    try:
+        actual_item = items_all[item_id]
+    except:
+        print("Please enter a vaild item name")
+        return
 
-    for element in inventory:
+    try:
+        for element in inventory:
 
-        if actual_item == element:
-            current_room["items"].append(element)
-            inventory.pop(i)
+            if actual_item == element:
+                current_room["items"].append(element)
+                inventory.pop(i)
 
-        i = i + 1
+            i = i + 1
+    except:
+        print("")
+        return
+        
     
 
 def execute_command(command):
@@ -378,6 +397,7 @@ def move(exits, direction):
     """
 
     # Next room to go to
+
     return rooms[exits[direction]]
 
 
